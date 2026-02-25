@@ -1,0 +1,21 @@
+# Основные
+aiohttp
+aiohttp-pydantic
+pydantic
+pydantic-settings
+sqlalchemy
+alembic
+asyncpg
+greenlet
+
+# Валидация
+email-validator
+# python-multipart
+
+# Dev зависимости
+# pytest
+# pytest-aiohttp
+# pytest-cov
+# black
+# isort
+# mypy
