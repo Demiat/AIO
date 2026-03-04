@@ -1,5 +1,5 @@
 """Менеджеры работы с базой данных."""
-from typing import Type
+from typing import Optional, Type
 
 from sqlalchemy import insert, update, select, func
 from sqlalchemy.exc import IntegrityError
@@ -20,8 +20,8 @@ EMPLOYEE_EXISTS = "Employee already exists."
 class EmployeeManager:
     """Работает с сотрудниками в базе данных."""
 
-    def __init__(self, db: DBDependency = DBDependency()):
-        self.db = db
+    def __init__(self, db: Optional[DBDependency] = None):
+        self.db = db or DBDependency()
         self.model: Type[Employee] = Employee
 
     async def _get_or_404(self, employee_id: int) -> Employee:
@@ -37,7 +37,9 @@ class EmployeeManager:
             return employee
 
     async def create_employee(
-            self, employee: EmployeeCreate) -> EmployeeResponse:
+        self,
+        employee: EmployeeCreate,
+    ) -> EmployeeResponse:
         """Создает сотрудника."""
         async with self.db.db_session() as session:
             try:
@@ -47,6 +49,7 @@ class EmployeeManager:
                     .returning(self.model)
                 )
             except IntegrityError:
+                await session.rollback()
                 raise web.HTTPBadRequest(
                     reason=EMPLOYEE_EXISTS,
                 )
@@ -54,7 +57,10 @@ class EmployeeManager:
             return EmployeeResponse.model_validate(result.scalar_one())
 
     async def get_employees(
-            self, limit: int, page: int) -> EmployeeListResponse:
+        self,
+        limit: Optional[int] = None,
+        page: Optional[int] = None,
+    ) -> EmployeeListResponse:
         """Получает пагинированный список сотрудников."""
         async with self.db.db_session() as session:
             query = select(self.model)
@@ -83,9 +89,10 @@ class EmployeeManager:
         )
 
     async def update_employee(
-            self,
-            employee_id: int,
-            employee: EmployeeCreate) -> EmployeeResponse:
+        self,
+        employee_id: int,
+        employee: EmployeeCreate,
+    ) -> EmployeeResponse:
         """Обновляет поля сотрудника."""
         # Первый вариант обновления - работа с объектами,
         # можно пользоваться событиями sqlalchemy.

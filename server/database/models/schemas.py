@@ -21,8 +21,8 @@ class EmployeeResponse(EmployeeCreate, BaseSchema):
 class EmployeeListResponse(BaseSchema):
     items: list[EmployeeResponse]
     total: int
-    page: Optional[int] = None,
-    limit: Optional[int] = None,
+    page: Optional[int] = None
+    limit: Optional[int] = None
 
 
 class Error(BaseModel):
