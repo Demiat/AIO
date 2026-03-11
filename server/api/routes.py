@@ -13,7 +13,7 @@ def add_routes(app):
             "Hi, World! Привет, МИР!")
         ),
         web.view(
-            "/api/v1/employee/{employee_id}", views.EmployeesViewDetail
+            "/api/v1/employees/{employee_id}", views.EmployeesViewDetail
         ),
-        web.view("/api/v1/employee", views.EmployeesView),
+        web.view("/api/v1/employees", views.EmployeesView),
     ])

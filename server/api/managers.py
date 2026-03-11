@@ -3,6 +3,7 @@ from typing import Optional, Type
 
 from sqlalchemy import insert, update, select, func
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 from aiohttp import web
 
 from server.core import DBDependency
@@ -24,17 +25,17 @@ class EmployeeManager:
         self.db = db or DBDependency()
         self.model: Type[Employee] = Employee
 
-    async def _get_or_404(self, employee_id: int) -> Employee:
+    async def _get_or_404(self, session: AsyncSession, employee_id: int) -> Employee:
         """Получает сотрудника из базы или поднимает 404."""
-        async with self.db.db_session() as session:
-            query = select(self.model).where(self.model.id == employee_id)
-            result = await session.execute(query)
-            employee = result.scalar_one_or_none()
+        result = await session.execute(
+            select(self.model).where(self.model.id == employee_id)
+        )
+        employee = result.scalar_one_or_none()
 
-            if not employee:
-                raise web.HTTPNotFound(reason="Employee not found")
+        if not employee:
+            raise web.HTTPNotFound(reason="Employee not found")
 
-            return employee
+        return employee
 
     async def create_employee(
         self,
@@ -49,7 +50,6 @@ class EmployeeManager:
                     .returning(self.model)
                 )
             except IntegrityError:
-                await session.rollback()
                 raise web.HTTPBadRequest(
                     reason=EMPLOYEE_EXISTS,
                 )
@@ -84,9 +84,10 @@ class EmployeeManager:
 
     async def get_employee(self, employee_id: int) -> EmployeeResponse:
         """Получает сотрудника по id."""
-        return EmployeeResponse.model_validate(
-            await self._get_or_404(employee_id)
-        )
+        async with self.db.db_session() as session:
+            return EmployeeResponse.model_validate(
+                await self._get_or_404(session, employee_id)
+            )
 
     async def update_employee(
         self,
@@ -109,16 +110,24 @@ class EmployeeManager:
 
         # Второй вариант - просто SQL запрос, зато 1 запрос
         async with self.db.db_session() as session:
-            query = (
+            result = await session.execute(
                 update(self.model)
                 .where(self.model.id == employee_id)
                 .values(name=employee.name, email=employee.email)
                 .returning(self.model)
             )
-            result = await session.execute(query)
             updated_employee = result.scalar_one_or_none()
 
             if not updated_employee:
                 raise web.HTTPNotFound(reason="Employee not found")
             await session.commit()
             return EmployeeResponse.model_validate(updated_employee)
+    
+    async def delete_employee(self, employee_id: int) -> None:
+        """Удаляет сотрудника по ID."""
+        async with self.db.db_session() as session:
+            employee = await self._get_or_404(session, employee_id)
+            await session.delete(employee)
+            await session.commit()
+
+

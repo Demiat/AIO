@@ -50,7 +50,7 @@ class EmployeesViewDetail(PydanticView):
         r200[EmployeeResponse], r404[Error]
     ]:
         """
-        Обновить сотрудника по ID.
+        Получает сотрудника по ID.
         Tags: Employees
         """
         employee = await employee_manager.get_employee(employee_id)
@@ -63,7 +63,7 @@ class EmployeesViewDetail(PydanticView):
         self, employee_id: int, /, employee: EmployeeCreate
     ) -> Union[r200[EmployeeResponse], r404[Error]]:
         """
-        Обновить сотрудника по ID.
+        Обновляет сотрудника по ID.
         Tags: Employees
         """
         updated_employee = await employee_manager.update_employee(
@@ -77,10 +77,12 @@ class EmployeesViewDetail(PydanticView):
 
     async def delete(self, employee_id: int, /) -> Union[r204, r404[Error]]:
         """
-        Удалить сотрудника по ID.
+        Удаляет сотрудника по ID.
         Tags: Employees
         """
+        await employee_manager.delete_employee(employee_id)
+
         return web.json_response(
-            {"message": f"Сотрудник {employee_id} удален!"},
+            {"message": f"Сотрудник c ID {employee_id} удален!"},
             status=204
         )
