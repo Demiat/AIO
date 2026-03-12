@@ -25,22 +25,18 @@ class EmployeeManager:
         self.db = db or DBDependency()
         self.model: Type[Employee] = Employee
 
-    async def _get_or_404(self, session: AsyncSession, employee_id: int) -> Employee:
-        """Получает сотрудника из базы или поднимает 404."""
+    async def _get_employee(self, session: AsyncSession, employee_id: int) -> Optional[Employee]:
+        """Получает сотрудника из базы или None"""
         result = await session.execute(
             select(self.model).where(self.model.id == employee_id)
         )
-        employee = result.scalar_one_or_none()
+        return result.scalar_one_or_none()
 
-        if not employee:
-            raise web.HTTPNotFound(reason="Employee not found")
-
-        return employee
 
     async def create_employee(
         self,
         employee: EmployeeCreate,
-    ) -> EmployeeResponse:
+    ) -> Employee:
         """Создает сотрудника."""
         async with self.db.db_session() as session:
             try:
@@ -50,17 +46,15 @@ class EmployeeManager:
                     .returning(self.model)
                 )
             except IntegrityError:
-                raise web.HTTPBadRequest(
-                    reason=EMPLOYEE_EXISTS,
-                )
+                raise
             await session.commit()
-            return EmployeeResponse.model_validate(result.scalar_one())
+            return result.scalar_one()
 
     async def get_employees(
         self,
         limit: Optional[int] = None,
         page: Optional[int] = None,
-    ) -> EmployeeListResponse:
+    ) -> dict:
         """Получает пагинированный список сотрудников."""
         async with self.db.db_session() as session:
             query = select(self.model)
@@ -75,38 +69,36 @@ class EmployeeManager:
                     func.count(self.model.id)
                 )
             )
-            return EmployeeListResponse(
-                total=total,
-                page=page,
-                limit=limit,
-                items=result.scalars().all(),
-            )
+            return {
+                "total": total,
+                "page": page,
+                "limit": limit,
+                "items": result.scalars().all()
+            }
 
-    async def get_employee(self, employee_id: int) -> EmployeeResponse:
+    async def get_employee(self, employee_id: int) -> Optional[Employee]:
         """Получает сотрудника по id."""
         async with self.db.db_session() as session:
-            return EmployeeResponse.model_validate(
-                await self._get_or_404(session, employee_id)
-            )
+            return await self._get_employee(session, employee_id)
 
     async def update_employee(
         self,
         employee_id: int,
         employee: EmployeeCreate,
-    ) -> EmployeeResponse:
+    ) -> Optional[Employee]:
         """Обновляет поля сотрудника."""
         # Первый вариант обновления - работа с объектами,
         # можно пользоваться событиями sqlalchemy.
         # Минусы - дополнительный запрос в базу данных
 
-        # db_employee = await self._get_or_404(employee_id)
+        # db_employee = await self._get_employee(employee_id)
         # db_employee.name = employee.name
         # db_employee.email = employee.email
 
         # async with self.db.db_session() as session:
         #     session.add(db_employee)
         #     await session.commit()
-        #     return EmployeeResponse.model_validate(db_employee)
+        #     return db_employee
 
         # Второй вариант - просто SQL запрос, зато 1 запрос
         async with self.db.db_session() as session:
@@ -117,16 +109,13 @@ class EmployeeManager:
                 .returning(self.model)
             )
             updated_employee = result.scalar_one_or_none()
-
-            if not updated_employee:
-                raise web.HTTPNotFound(reason="Employee not found")
             await session.commit()
-            return EmployeeResponse.model_validate(updated_employee)
+            return updated_employee
     
     async def delete_employee(self, employee_id: int) -> None:
         """Удаляет сотрудника по ID."""
         async with self.db.db_session() as session:
-            employee = await self._get_or_404(session, employee_id)
+            employee = await self.self._get_employee(session, employee_id)
             await session.delete(employee)
             await session.commit()
 

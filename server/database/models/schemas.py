@@ -12,6 +12,7 @@ class BaseSchema(BaseModel):
 class EmployeeCreate(BaseSchema):
     name: str
     email: EmailStr
+    rate_per_hour: int
 
 
 class EmployeeResponse(EmployeeCreate, BaseSchema):

@@ -7,6 +7,7 @@ sqlalchemy
 alembic
 asyncpg
 greenlet
+aiohttp-rpc
 
 # Валидация
 email-validator

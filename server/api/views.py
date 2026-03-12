@@ -1,5 +1,6 @@
 from typing import Union, Optional
 
+from sqlalchemy.exc import IntegrityError
 from aiohttp import web
 from aiohttp_pydantic import PydanticView
 from aiohttp_pydantic.oas.typing import r200, r201, r204, r404
@@ -8,9 +9,9 @@ from aiohttp_pydantic.oas.typing import r200, r201, r204, r404
 from server.database.models.schemas import (
     EmployeeCreate, EmployeeResponse, EmployeeListResponse, Error
 )
-from .managers import EmployeeManager
+from . import employee_manager
 
-employee_manager = EmployeeManager()
+EMPLOYEE_EXISTS = "Employee already exists."
 
 
 class EmployeesView(PydanticView):
@@ -20,11 +21,15 @@ class EmployeesView(PydanticView):
         Создает сотрудника.
         Tags: Employees
         """
-        # employee уже валидирован
-        created_employee = await employee_manager.create_employee(employee)
-        return web.Response(
-            text=created_employee.model_dump_json(),
-            content_type='application/json',
+        # json employee уже валидирован
+        try:
+            created_employee = await employee_manager.create_employee(employee)
+        except IntegrityError:
+            raise web.HTTPBadRequest(
+                    reason=EMPLOYEE_EXISTS,
+                )
+        return web.json_response(
+            EmployeeResponse.model_validate(created_employee).model_dump(),
             status=201
         )
 
@@ -38,9 +43,9 @@ class EmployeesView(PydanticView):
         Tags: Employees
         """
         emp_list = await employee_manager.get_employees(limit, page)
-        return web.Response(
-            text=emp_list.model_dump_json(),
-            content_type='application/json'
+        return web.json_response(
+            EmployeeListResponse(**emp_list).model_dump(),
+            status=200
         )
 
 
@@ -54,8 +59,12 @@ class EmployeesViewDetail(PydanticView):
         Tags: Employees
         """
         employee = await employee_manager.get_employee(employee_id)
+        if not employee:
+            raise web.HTTPNotFound(reason="Employee not found")
         return web.Response(
-            text=employee.model_dump_json(),
+            text=EmployeeResponse.model_validate(
+                employee
+            ).model_dump_json(),
             content_type='application/json'
         )
 
@@ -70,6 +79,9 @@ class EmployeesViewDetail(PydanticView):
             employee_id,
             employee
         )
+        if not updated_employee:
+            raise web.HTTPNotFound(reason="Employee not found")
+        EmployeeResponse.model_validate(updated_employee)
         return web.Response(
             text=updated_employee.model_dump_json(),
             content_type='application/json'

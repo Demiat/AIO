@@ -17,3 +17,4 @@ class Employee(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(nullable=False)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
+    rate_per_hour: Mapped[int] = mapped_column(nullable=False)
