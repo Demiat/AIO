@@ -4,14 +4,11 @@ from typing import Optional, Type
 from sqlalchemy import insert, update, select, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from aiohttp import web
 
 from server.core import DBDependency
 from server.database.models import Employee
 from server.database.models.schemas import (
     EmployeeCreate,
-    EmployeeResponse,
-    EmployeeListResponse,
 )
 from .pagination import pg_offset
 
@@ -112,11 +109,14 @@ class EmployeeManager:
             await session.commit()
             return updated_employee
     
-    async def delete_employee(self, employee_id: int) -> None:
+    async def delete_employee(self, employee_id: int) -> bool:
         """Удаляет сотрудника по ID."""
         async with self.db.db_session() as session:
-            employee = await self.self._get_employee(session, employee_id)
+            employee = await self._get_employee(session, employee_id)
+            if not employee:
+                return False
             await session.delete(employee)
             await session.commit()
+            return True
 
 

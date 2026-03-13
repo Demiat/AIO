@@ -28,9 +28,10 @@ class EmployeesView(PydanticView):
             raise web.HTTPBadRequest(
                     reason=EMPLOYEE_EXISTS,
                 )
-        return web.json_response(
-            EmployeeResponse.model_validate(created_employee).model_dump(),
-            status=201
+        return web.Response(
+            text=EmployeeResponse.model_validate(created_employee).model_dump_json(),
+            status=201,
+            content_type='application/json'
         )
 
     async def get(
@@ -43,9 +44,9 @@ class EmployeesView(PydanticView):
         Tags: Employees
         """
         emp_list = await employee_manager.get_employees(limit, page)
-        return web.json_response(
-            EmployeeListResponse(**emp_list).model_dump(),
-            status=200
+        return web.Response(
+            text=EmployeeListResponse(**emp_list).model_dump_json(),
+            content_type='application/json'
         )
 
 
@@ -92,8 +93,11 @@ class EmployeesViewDetail(PydanticView):
         Удаляет сотрудника по ID.
         Tags: Employees
         """
-        await employee_manager.delete_employee(employee_id)
-
+        delete_employee = await employee_manager.delete_employee(
+            employee_id
+        )
+        if not delete_employee:
+            raise web.HTTPNotFound(reason="Employee not found")
         return web.json_response(
             {"message": f"Сотрудник c ID {employee_id} удален!"},
             status=204
