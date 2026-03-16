@@ -5,6 +5,7 @@ from . import employee_manager
 
 @aiohttp_rpc.rpc_method()
 async def calculate_salary(employee_id: int, hours: int):
+    """Рассчитывает зарплату сотрудника за отработанные часы."""
     employee = await employee_manager.get_employee(employee_id)
     if not employee:
         raise aiohttp_rpc.errors.InvalidParams("Employee not found")

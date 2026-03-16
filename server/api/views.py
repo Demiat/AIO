@@ -82,9 +82,8 @@ class EmployeesViewDetail(PydanticView):
         )
         if not updated_employee:
             raise web.HTTPNotFound(reason="Employee not found")
-        EmployeeResponse.model_validate(updated_employee)
         return web.Response(
-            text=updated_employee.model_dump_json(),
+            text=EmployeeResponse.model_validate(updated_employee).model_dump_json(),
             content_type='application/json'
         )
 

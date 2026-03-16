@@ -86,11 +86,12 @@ class EmployeeManager:
         """Обновляет поля сотрудника."""
         # Первый вариант обновления - работа с объектами,
         # можно пользоваться событиями sqlalchemy.
-        # Минусы - дополнительный запрос в базу данных
+        # Минусы - дополнительный запрос в базу данных (get_employee)
 
         # db_employee = await self._get_employee(employee_id)
         # db_employee.name = employee.name
         # db_employee.email = employee.email
+        # db_employee.rate_per_hour = employee.rate_per_hour
 
         # async with self.db.db_session() as session:
         #     session.add(db_employee)
@@ -102,7 +103,7 @@ class EmployeeManager:
             result = await session.execute(
                 update(self.model)
                 .where(self.model.id == employee_id)
-                .values(name=employee.name, email=employee.email)
+                .values(**employee.model_dump())
                 .returning(self.model)
             )
             updated_employee = result.scalar_one_or_none()

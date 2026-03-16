@@ -1,6 +1,3 @@
-# from datetime import datetime
-
-# from sqlalchemy import String, BigInteger, DateTime, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
