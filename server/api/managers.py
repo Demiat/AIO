@@ -1,4 +1,7 @@
-"""Менеджеры работы с базой данных."""
+"""
+Менеджеры работы с базой данных.
+Возвращается результат работы не смешиваясь с остальной логикой приложения.
+"""
 from typing import Optional, Type
 
 from sqlalchemy import insert, update, select, func
@@ -11,8 +14,6 @@ from server.database.models.schemas import (
     EmployeeCreate,
 )
 from .pagination import pg_offset
-
-EMPLOYEE_EXISTS = "Employee already exists."
 
 
 class EmployeeManager:
@@ -43,6 +44,7 @@ class EmployeeManager:
                     .returning(self.model)
                 )
             except IntegrityError:
+                await session.rollback()
                 raise
             await session.commit()
             return result.scalar_one()
@@ -100,13 +102,17 @@ class EmployeeManager:
 
         # Второй вариант - просто SQL запрос, зато 1 запрос
         async with self.db.db_session() as session:
-            result = await session.execute(
-                update(self.model)
-                .where(self.model.id == employee_id)
-                .values(**employee.model_dump())
-                .returning(self.model)
-            )
-            updated_employee = result.scalar_one_or_none()
+            try:
+                result = await session.execute(
+                    update(self.model)
+                    .where(self.model.id == employee_id)
+                    .values(**employee.model_dump())
+                    .returning(self.model)
+                )
+                updated_employee = result.scalar_one_or_none()
+            except IntegrityError:
+                await session.rollback()
+                raise
             await session.commit()
             return updated_employee
     

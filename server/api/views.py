@@ -76,10 +76,15 @@ class EmployeesViewDetail(PydanticView):
         Обновляет сотрудника по ID.
         Tags: Employees
         """
-        updated_employee = await employee_manager.update_employee(
-            employee_id,
-            employee
-        )
+        try:
+            updated_employee = await employee_manager.update_employee(
+                employee_id,
+                employee
+            )
+        except IntegrityError:
+            raise web.HTTPBadRequest(
+                reason=EMPLOYEE_EXISTS,
+            )
         if not updated_employee:
             raise web.HTTPNotFound(reason="Employee not found")
         return web.Response(
