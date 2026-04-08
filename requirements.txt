@@ -8,14 +8,15 @@ alembic
 asyncpg
 greenlet
 aiohttp-rpc
+openapi-python-generator
 
 # Валидация
 email-validator
 # python-multipart
 
 # Dev зависимости
-# pytest
-# pytest-aiohttp
+pytest
+pytest-aiohttp
 # pytest-cov
 # black
 # isort

@@ -1,0 +1,301 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Aiohttp pydantic application"
+    },
+    "paths": {
+        "/api/v1/employees/{employee_id}": {
+            "put": {
+                "description": "\u041e\u0431\u043d\u043e\u0432\u043b\u044f\u0435\u0442 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u0430 \u043f\u043e ID.",
+                "tags": [
+                    "Employees"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmployeeCreate"
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "employee_id",
+                        "required": true,
+                        "schema": {
+                            "title": "employee_id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmployeeResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "description": "\u041f\u043e\u043b\u0443\u0447\u0430\u0435\u0442 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u0430 \u043f\u043e ID.",
+                "tags": [
+                    "Employees"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "employee_id",
+                        "required": true,
+                        "schema": {
+                            "title": "employee_id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmployeeResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "\u0423\u0434\u0430\u043b\u044f\u0435\u0442 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u0430 \u043f\u043e ID.",
+                "tags": [
+                    "Employees"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "employee_id",
+                        "required": true,
+                        "schema": {
+                            "title": "employee_id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "",
+                        "content": {}
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/employees": {
+            "get": {
+                "description": "\u0412\u044b\u0432\u043e\u0434\u0438\u0442 \u0441\u043f\u0438\u0441\u043e\u043a \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u043e\u0432.",
+                "tags": [
+                    "Employees"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "title": "limit",
+                            "type": "integer",
+                            "nullable": true
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "title": "page",
+                            "type": "integer",
+                            "nullable": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmployeeListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "\u0421\u043e\u0437\u0434\u0430\u0435\u0442 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a\u0430.",
+                "tags": [
+                    "Employees"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmployeeCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmployeeResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "EmployeeCreate": {
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "email": {
+                        "format": "email",
+                        "title": "Email",
+                        "type": "string"
+                    },
+                    "rate_per_hour": {
+                        "title": "Rate Per Hour",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "name",
+                    "email",
+                    "rate_per_hour"
+                ],
+                "title": "EmployeeCreate",
+                "type": "object"
+            },
+            "EmployeeResponse": {
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "email": {
+                        "format": "email",
+                        "title": "Email",
+                        "type": "string"
+                    },
+                    "rate_per_hour": {
+                        "title": "Rate Per Hour",
+                        "type": "integer"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "name",
+                    "email",
+                    "rate_per_hour",
+                    "id"
+                ],
+                "title": "EmployeeResponse",
+                "type": "object"
+            },
+            "Error": {
+                "properties": {
+                    "error": {
+                        "title": "Error",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "error"
+                ],
+                "title": "Error",
+                "type": "object"
+            },
+            "EmployeeListResponse": {
+                "properties": {
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/EmployeeResponse"
+                        },
+                        "title": "Items",
+                        "type": "array"
+                    },
+                    "total": {
+                        "title": "Total",
+                        "type": "integer"
+                    },
+                    "page": {
+                        "title": "Page",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "limit": {
+                        "title": "Limit",
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "items",
+                    "total"
+                ],
+                "title": "EmployeeListResponse",
+                "type": "object"
+            }
+        }
+    }
+}

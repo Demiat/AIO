@@ -29,7 +29,7 @@ def create_app() -> web.Application:
 
     return app
 
+app = create_app()
 
 if __name__ == "__main__":
-    app = create_app()
     web.run_app(app, host=settings.HOST, port=settings.PORT)
