@@ -4,15 +4,14 @@
 """
 from typing import Optional, Type
 
-from sqlalchemy import insert, update, select, func
+from sqlalchemy import func, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.core import DBDependency
 from server.database.models import Employee
-from server.database.models.schemas import (
-    EmployeeCreate,
-)
+from server.database.models.schemas import EmployeeCreate
+
 from .pagination import pg_offset
 
 

@@ -1,5 +1,5 @@
-from server.main import app
 from server.database.models.schemas import EmployeeResponse
+from server.main import app
 
 
 async def test_get_employee(aiohttp_client):

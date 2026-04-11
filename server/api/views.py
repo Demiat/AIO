@@ -1,14 +1,17 @@
-from typing import Union, Optional
+from typing import Optional, Union
 
-from sqlalchemy.exc import IntegrityError
 from aiohttp import web
 from aiohttp_pydantic import PydanticView
 from aiohttp_pydantic.oas.typing import r200, r201, r204, r404
-
+from sqlalchemy.exc import IntegrityError
 
 from server.database.models.schemas import (
-    EmployeeCreate, EmployeeResponse, EmployeeListResponse, Error
+    EmployeeCreate,
+    EmployeeListResponse,
+    EmployeeResponse,
+    Error,
 )
+
 from . import employee_manager
 
 EMPLOYEE_EXISTS = "Employee already exists."
@@ -29,7 +32,9 @@ class EmployeesView(PydanticView):
                     reason=EMPLOYEE_EXISTS,
                 )
         return web.Response(
-            text=EmployeeResponse.model_validate(created_employee).model_dump_json(),
+            text=EmployeeResponse.model_validate(
+                created_employee
+            ).model_dump_json(),
             status=201,
             content_type='application/json'
         )
@@ -88,7 +93,9 @@ class EmployeesViewDetail(PydanticView):
         if not updated_employee:
             raise web.HTTPNotFound(reason="Employee not found")
         return web.Response(
-            text=EmployeeResponse.model_validate(updated_employee).model_dump_json(),
+            text=EmployeeResponse.model_validate(
+                updated_employee
+            ).model_dump_json(),
             content_type='application/json'
         )
 
