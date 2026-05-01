@@ -9,6 +9,7 @@ asyncpg
 greenlet
 aiohttp-rpc
 openapi-python-generator
+aiosqlite
 
 # Валидация
 email-validator

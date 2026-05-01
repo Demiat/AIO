@@ -1,8 +1,12 @@
+from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class DBSettings(BaseSettings):
     """Настройки для подключения базы данных."""
+
+    env: Literal["dev", "test", "prod"] = "dev"
 
     db_name: str
     db_user: str
@@ -16,11 +20,20 @@ class DBSettings(BaseSettings):
 
     @property
     def db_url(self):
-        return (
-            f"postgresql+asyncpg://{self.db_user}:"
-            f"{self.db_password}@"
-            f"{self.db_host}:{self.db_port}/{self.db_name}"
-        )
+        """
+        Возвращает строку подключения к базе
+        в зависимости от рабочего окружения.
+        """
+        if self.env == "test":
+            return "sqlite+aiosqlite:///:memory:"
+        elif self.env == "dev":
+            return f"sqlite+aiosqlite:///dev.db"
+        else:  # env prod
+            return (
+                f"postgresql+asyncpg://{self.db_user}:"
+                f"{self.db_password}@"
+                f"{self.db_host}:{self.db_port}/{self.db_name}"
+            )
 
 
 class Settings(BaseSettings):
@@ -31,7 +44,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf8", extra="ignore")
 
-    db_settings: DBSettings = DBSettings()
+    db_settings: DBSettings = DBSettings()  # type: ignore[call-arg]
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]
